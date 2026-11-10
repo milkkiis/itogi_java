@@ -42,10 +42,16 @@ section[id] { scroll-margin-top: 70px; }
     transform: none;
 }
 
-/* Заголовок: плавная смена цвета по клику */
+/* Цвет задаётся через переменные --hero-top и --hero-bottom,
+   которые меняет JavaScript при клике. */
 #heroTitle {
+    --hero-top: #ffffff;
+    --hero-bottom: #9a9a9a;
     cursor: pointer;
-    transition: color 0.4s;
+    background: linear-gradient(var(--hero-top), var(--hero-bottom));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 /* Картинки проектов без просвета под ними */
@@ -92,7 +98,7 @@ body.night .masthead h2 {
     color: #fff !important;
 }
 
-/* Меню в ночном режиме.*/
+/* Меню в ночном режиме */
 body.night #mainNav.navbar-shrink {
     background-color: #000 !important;
 }

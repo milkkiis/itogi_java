@@ -1,43 +1,35 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    // ---- Получаем элементы по id (getElementById) ----
-    const heroTitle = document.getElementById('heroTitle');       // заголовок Grayscale
-    const progress = document.getElementById('scrollProgress');   // полоса прогресса
-    const percent = document.getElementById('scrollPercent');     // процент в подвале
-    const toTop = document.getElementById('toTop');               // кнопка «наверх»
-    const themeBtn = document.getElementById('themeBtn');         // кнопка ночного режима
-    const form = document.getElementById('contactForm');          // форма подписки
-    const emailInput = document.getElementById('emailAddress');   // поле email
-    const emailError = document.getElementById('emailError');     // текст ошибки
-    const successMsg = document.getElementById('submitSuccessMessage'); // сообщение об успехе
-    const submitBtn = document.getElementById('submitButton');    // кнопка отправки
+    const heroTitle = document.getElementById('heroTitle');
+    const progress = document.getElementById('scrollProgress');
+    const percent = document.getElementById('scrollPercent');
+    const toTop = document.getElementById('toTop');
+    const themeBtn = document.getElementById('themeBtn');
+    const form = document.getElementById('contactForm');
+    const emailInput = document.getElementById('emailAddress');
+    const emailError = document.getElementById('emailError');
+    const successMsg = document.getElementById('submitSuccessMessage');
+    const submitBtn = document.getElementById('submitButton');
 
-    // 1. СОБЫТИЕ ПРОКРУТКИ (scroll)
-    // Вызывается при каждой прокрутке страницы пользователем.
+    // 1. Событие прокрутки: полоса, процент, кнопка «наверх»
     window.addEventListener('scroll', function () {
-        const y = window.scrollY; // сколько пикселей прокручено от верха
-
-        // Максимально возможная прокрутка = высота страницы минус высота окна.
+        const y = window.scrollY;
         const max = document.documentElement.scrollHeight - window.innerHeight;
         const value = max > 0 ? Math.round((y / max) * 100) : 0;
 
-        progress.style.width = value + '%'; // меняем стиль полосы через DOM
-        percent.textContent = value;        // меняем текст счётчика через DOM
-
-        // Кнопка «наверх» видна только после 400px прокрутки.
+        progress.style.width = value + '%';
+        percent.textContent = value;
         toTop.style.display = y > 400 ? 'block' : 'none';
     });
 
-    // 2. КНОПКА «НАВЕРХ» — метод window.scroll()
+    // 2. Кнопка «наверх» через window.scroll()
     toTop.addEventListener('click', function () {
         window.scroll({ top: 0, left: 0, behavior: 'smooth' });
     });
 
-    // 3. АНИМАЦИЯ ПОЯВЛЕНИЯ СЕКЦИЙ
-    // IntersectionObserver сообщает, когда элемент входит в видимую область.
+    // 3. Анимация появления секций
     const observer = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
-            // Добавляем .visible, CSS-transition делает плавное появление.
             if (entry.isIntersecting) entry.target.classList.add('visible');
         });
     }, { threshold: 0.15 });
@@ -45,22 +37,25 @@ document.addEventListener('DOMContentLoaded', function () {
         observer.observe(el);
     });
 
-    // 4. ИЗМЕНЕНИЕ СТИЛЕЙ ПО КЛИКУ НА ЗАГОЛОВОК
-    // Каждый клик берёт следующий цвет из списка.
-    const colors = ['#ffffff', '#64a19d', '#f4b942', '#e66a6a'];
-    let colorIndex = 0;
+    // 4. Смена цвета заголовка по клику
+    const palettes = [
+        { top: '#ffffff', bottom: '#9a9a9a' },
+        { top: '#8fd3cf', bottom: '#64a19d' },
+        { top: '#ffd98a', bottom: '#f4b942' },
+        { top: '#ff9d9d', bottom: '#e66a6a' }
+    ];
+    let paletteIndex = 0;
     heroTitle.addEventListener('click', function () {
-        colorIndex = (colorIndex + 1) % colors.length; 
-        heroTitle.style.color = colors[colorIndex];
+        paletteIndex = (paletteIndex + 1) % palettes.length;
+        heroTitle.style.setProperty('--hero-top', palettes[paletteIndex].top);
+        heroTitle.style.setProperty('--hero-bottom', palettes[paletteIndex].bottom);
     });
 
-    // 5. НОЧНОЙ РЕЖИМ
-    // Применяет или снимает режим и обновляет текст кнопки.
+    // 5. Ночной режим
     function applyTheme(night) {
         document.body.classList.toggle('night', night);
-        themeBtn.textContent = night ? 'Day mode' : 'Night mode';
+        themeBtn.textContent = night ? 'Дневной режим' : 'Ночной режим';
     }
-    // При загрузке читаем сохранённый выбор из localStorage.
     applyTheme(localStorage.getItem('theme') === 'night');
     themeBtn.addEventListener('click', function () {
         const night = !document.body.classList.contains('night');
@@ -68,28 +63,26 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem('theme', night ? 'night' : 'day');
     });
 
-    // 6. ФОРМА ПОДПИСКИ: проверка email
+    // 6. Форма подписки: проверка email
     form.addEventListener('submit', function (event) {
-        event.preventDefault(); // не даём странице перезагрузиться
+        event.preventDefault();
         const value = emailInput.value.trim();
 
-        // Сбрасываем прошлые сообщения.
         emailError.classList.add('d-none');
         successMsg.classList.add('d-none');
         emailInput.classList.remove('is-error');
 
         if (value === '') {
-            showError('An email is required.');
+            showError('Введите email.');
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-            showError('Email is not valid.');
+            showError('Email указан неверно.');
         } else {
             successMsg.classList.remove('d-none');
-            submitBtn.textContent = 'Subscribed!';
+            submitBtn.textContent = 'Вы подписаны!';
             form.reset();
         }
     });
 
-    // Показывает текст ошибки и подсвечивает поле красной рамкой.
     function showError(text) {
         emailError.textContent = text;
         emailError.classList.remove('d-none');
